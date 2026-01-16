@@ -1,0 +1,793 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="main-title">Solunum Analizi & Wim Hof Egzersizi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #22b8cf;
+      --primary-hover: #15aabf;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --text-muted: #94a3b8;
+      --border-color: #f1f5f9;
+      --accent-light: #e3f9fd;
+      --warning-bg: #fff7ed;
+      --warning-text: #9a3412;
+      --info-bg: #eff6ff;
+      --info-text: #1e40af;
+      --wimhof-accent: #3b82f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      padding-bottom: 20px;
+    }
+
+    header {
+      background: #fff;
+      padding: 15px 5%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 { margin: 0; font-size: 20px; font-weight: 700; color: #1e293b; }
+    
+    .lang-select {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .page { display: none; }
+    .page.active { display: grid; }
+
+    .test-grid {
+      grid-template-columns: 1.8fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0,0,0,0.02);
+      margin-bottom: 25px;
+    }
+
+    .medical-disclaimer {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ffedd5;
+    }
+
+    .visualizer-container {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .breath-circle {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--primary), #67e8f9);
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(34, 184, 207, 0.3);
+      transition: transform 1.5s ease-in-out;
+    }
+
+    .breathing { animation: breathe 4s infinite ease-in-out; }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.6); opacity: 1; }
+    }
+
+    .how-to-box {
+      background: var(--accent-light);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .step-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; color: #0c525d; }
+    .step-num { width: 22px; height: 22px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; margin-right: 12px; }
+
+    .timer-display { text-align: center; padding: 15px 0; }
+    .timer-display .value { font-size: 56px; font-weight: 800; color: #1e293b; }
+
+    .btn { padding: 14px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-start { background: var(--primary); color: white; }
+    .btn-stop { background: #f1f5f9; color: #64748b; }
+
+    /* Egzersiz Sayfası Özel Stilleri */
+    .exercise-status { font-size: 18px; font-weight: 700; color: var(--wimhof-accent); margin-bottom: 10px; text-transform: uppercase; text-align: center; }
+    .breath-counter { font-size: 24px; font-weight: 800; color: #1e293b; margin-top: 10px; text-align: center; }
+    .instruction-text { font-size: 16px; color: var(--text-main); text-align: center; margin: 15px 0; min-height: 48px; }
+
+    /* Bilgi Sayfası Stilleri */
+    .info-section { max-width: 900px; margin: 0 auto; line-height: 1.6; }
+    .info-header { text-align: center; margin-bottom: 40px; }
+    .info-header h2 { font-size: 32px; color: #1e293b; margin-bottom: 10px; }
+    
+    .data-table-wrapper { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border-color); }
+    .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 14px; min-width: 500px; }
+    .data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .data-table th { background: #f8fafc; color: #475569; font-weight: 700; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover { background: #f8fafc; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+    .info-card-small { background: #f8fafc; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); }
+    .info-card-small h4 { margin: 0 0 5px 0; font-size: 14px; color: #1e293b; }
+    .info-card-small p { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .test-grid { grid-template-columns: 1fr; }
+      .header-top { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .header-right { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+    }
+    
+    .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+    #resultCard { margin-top: 20px; background: #fdfdfd; border: 2px solid var(--accent-light); border-radius: 15px; padding: 20px; transition: opacity 0.3s ease; }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .result-item { background: white; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
+    .result-item label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+    .result-item span { font-size: 22px; font-weight: 800; color: var(--primary); }
+    .expert-advice { margin-top: 15px; padding: 12px; border-radius: 8px; background: #fee2e2; color: #991b1b; font-size: 13px; display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-left">
+      <h1 data-i18n="header-title">Solunum & Kondisyon Analizi</h1>
+    </div>
+    <div class="header-right" style="display:flex; align-items:center; gap:15px;">
+      <div id="statsMini" style="font-size: 13px; color: var(--text-muted)">
+        <span data-i18n="top-score-label">En İyi:</span> <span id="topScoreMini" style="font-weight:700; color:var(--primary)">–</span>
+      </div>
+      <select id="langSelect" class="lang-select">
+        <option value="tr">Türkçe</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" onclick="switchTab(event, 'test-page')" data-i18n="tab-test">Test Yap</button>
+    <button class="tab-btn" onclick="switchTab(event, 'exercise-page')" data-i18n="tab-exercise">Nefes Egzersizi</button>
+    <button class="tab-btn" onclick="switchTab(event, 'info-page')" data-i18n="tab-info">VO₂ Max Nedir?</button>
+  </nav>
+</header>
+
+<div class="container">
+  
+  <main id="test-page" class="page active test-grid">
+    <section>
+      <div class="card">
+        <div class="medical-disclaimer" data-i18n="medical-disclaimer">
+          <strong>⚠️ ÖNEMLİ UYARI:</strong> Bu uygulama tıbbi bir teşhis aracı değildir.
+        </div>
+
+        <div class="visualizer-container">
+          <div id="breathCircle" class="breath-circle breathing"></div>
+        </div>
+
+        <div class="how-to-box">
+          <div class="step-item"><div class="step-num">1</div> <span data-i18n="test-step-1">Derin bir nefes alın ve daire büyüdüğünde nefesinizi tutun.</span></div>
+          <div class="step-item"><div class="step-num">2</div> <span data-i18n="test-step-2"><b>Başlat</b>'a basın ve nefesinizi tutmaya devam edin.</span></div>
+          <div class="step-item"><div class="step-num">3</div> <span data-i18n="test-step-3">Değerleri canlı takip edin. Durmak için <b>Durdur</b>'a basın.</span></div>
+        </div>
+
+        <div class="timer-display">
+          <span class="value" id="time">0</span><span style="font-size:24px; color:var(--text-muted); margin-left:5px;" data-i18n="unit-sec">sn</span>
+        </div>
+
+        <div class="button-group" style="display:flex; gap:15px; justify-content:center;">
+          <button id="start" class="btn btn-start" data-i18n="btn-start-test">Testi Başlat</button>
+          <button id="stop" class="btn btn-stop" disabled data-i18n="btn-stop">Durdur</button>
+        </div>
+
+        <div id="resultCard" style="opacity: 0.6;">
+          <h3 style="margin:0; font-size:15px; color:#1e293b;" data-i18n="live-analysis">Anlık Analiz Verileri</h3>
+          <div class="result-grid">
+            <div class="result-item">
+              <label data-i18n="label-lung-age">Tahmini Akciğer Yaşı</label>
+              <span id="lungAge" data-i18n="status-waiting">Bekleniyor</span>
+            </div>
+            <div class="result-item">
+              <label data-i18n="label-vo2-max">Tahmini VO₂ Max</label>
+              <span id="vo2Max" data-i18n="status-waiting">Bekleniyor</span>
+            </div>
+          </div>
+          <div id="expertAdvice" class="expert-advice" data-i18n="expert-advice-low">
+            <strong>Uzman Tavsiyesi:</strong> Nefes tutma süreniz düşüktür.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h3 style="font-size:16px; margin-top:0;" data-i18n="summary-data">Özet Veriler</h3>
+        <div class="stat-row"><span data-i18n="stat-total">Toplam Test</span><span class="val" id="totalTests">0</span></div>
+        <div class="stat-row"><span data-i18n="stat-avg">Ortalama Süre</span><span class="val" id="avgScore">–</span></div>
+        <div class="stat-row"><span data-i18n="stat-status">Durum</span><span id="statusBadge" class="val" style="color:var(--primary)" data-i18n="badge-ready">Hazır</span></div>
+      </div>
+      <div class="card" style="padding: 15px;">
+        <canvas id="chart" style="width: 100%; height: 200px;"></canvas>
+      </div>
+    </aside>
+  </main>
+
+  <main id="exercise-page" class="page">
+    <section class="info-section">
+      <div class="info-header">
+        <h2 data-i18n="ex-title">Wim Hof Tekniği</h2>
+        <p style="color:var(--text-muted)" data-i18n="ex-subtitle">Akciğer kapasitesini geliştirin.</p>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div id="exStatus" class="exercise-status" data-i18n="badge-ready">Hazır</div>
+        <div class="visualizer-container" style="margin: 30px 0;">
+          <div id="exCircle" class="breath-circle" style="background: linear-gradient(135deg, var(--wimhof-accent), #60a5fa);"></div>
+        </div>
+        <div id="exInstruction" class="instruction-text" data-i18n="ex-start-instruction">Başlamak için butona dokunun.</div>
+        <div id="exCounter" class="breath-counter">0 / 30</div>
+        <div class="timer-display" id="exTimerDisplay" style="display:none;">
+          <span class="value" id="exTime">0</span><span style="font-size:24px; color:var(--text-muted); margin-left:5px;" data-i18n="unit-sec">sn</span>
+        </div>
+        <div class="button-group" style="display:flex; gap:15px; justify-content:center; margin-top: 20px;">
+          <button id="exStart" class="btn btn-start" style="background: var(--wimhof-accent)" data-i18n="btn-start-ex">Egzersizi Başlat</button>
+          <button id="exReset" class="btn btn-stop" style="display:none;" data-i18n="btn-reset">Sıfırla</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="info-page" class="page info-section">
+    <div class="info-header">
+      <h2 data-i18n="info-title">VO₂ Max Hakkında Bilmeniz Gerekenler</h2>
+      <p style="color:var(--text-muted)" data-i18n="info-subtitle">Sağlık ve performansın en önemli biyolojik göstergesi</p>
+    </div>
+    
+    <div class="card">
+      <h3 data-i18n="info-q1">VO₂ Max Neden Önemli?</h3>
+      <p data-i18n="info-p1">VO₂ max, yalnızca bir "spor performansı" göstergesi değil, aynı zamanda <strong>genel sağlık, metabolizma ve yaşlanma süreci</strong> hakkında önemli ipuçları verir. Düzenli ölçüm ve antrenmanla bu değeri yükseltmek mümkündür.</p>
+      <p data-i18n="info-p2">Vücudunuzun dakikada kilogram başına ne kadar oksijen kullanabildiğini gösteren bu değer, <strong>kardiyovasküler kondisyonunuzun en güvenilir göstergesi</strong> olarak kabul edilir.</p>
+      
+      <h3 style="margin-top:30px;" data-i18n="info-table-title">Yetişkinler İçin VO₂ Max Ortalama Değerleri (ml/kg/dk)</h3>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th data-i18n="th-age">Yaş Aralığı</th>
+              <th data-i18n="th-male">Erkek (Ortalama)</th>
+              <th data-i18n="th-female">Kadın (Ortalama)</th>
+              <th data-i18n="th-eval">Değerlendirme</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>20-29</td>
+              <td>40-45</td>
+              <td>35-40</td>
+              <td data-i18n="td-eval-1">Genç yetişkinlerde iyi kondisyon</td>
+            </tr>
+            <tr>
+              <td>30-39</td>
+              <td>38-43</td>
+              <td>33-38</td>
+              <td data-i18n="td-eval-2">Aktif bireyler için normal</td>
+            </tr>
+            <tr>
+              <td>40-49</td>
+              <td>35-40</td>
+              <td>30-35</td>
+              <td data-i18n="td-eval-3">Orta seviye, hareketsizlerde düşüş</td>
+            </tr>
+            <tr>
+              <td>50-59</td>
+              <td>32-37</td>
+              <td>28-32</td>
+              <td data-i18n="td-eval-4">Yaşlanma etkisi belirginleşir</td>
+            </tr>
+            <tr>
+              <td>60+</td>
+              <td>28-32</td>
+              <td>25-28</td>
+              <td data-i18n="td-eval-5">Düzenli egzersizle korunabilir</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:30px;" data-i18n="info-effects-title">VO₂ Max'in Sağlık Üzerindeki Etkileri</h3>
+      <div class="info-grid">
+        <div class="info-card-small">
+          <h4 data-i18n="effect-card-1-t">Kardiyovasküler Sağlık</h4>
+          <p data-i18n="effect-card-1-p">Kalp ve dolaşım sistemi verimliliğinin göstergesi.</p>
+        </div>
+        <div class="info-card-small">
+          <h4 data-i18n="effect-card-2-t">Metabolizma</h4>
+          <p data-i18n="effect-card-2-p">Vücudun enerji üretim kapasitesini yansıtır.</p>
+        </div>
+        <div class="info-card-small">
+          <h4 data-i18n="effect-card-3-t">Hastalık Direnci</h4>
+          <p data-i18n="effect-card-3-p">Yüksek VO₂ birçok hastalığa karşı koruma sağlar.</p>
+        </div>
+        <div class="info-card-small">
+          <h4 data-i18n="effect-card-4-t">Yaşlanma Süreci</h4>
+          <p data-i18n="effect-card-4-p">Biyolojik yaş ve yaşlanma hızı hakkında bilgi verir.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span data-i18n="footer-credit">Aysun tarafından hazırlanmıştır.</span> &copy; 2026 Oxygen Harmony
+  </footer>
+</div>
+
+<script>
+  const translations = {
+    tr: {
+      "header-title": "Solunum & Kondisyon Analizi",
+      "top-score-label": "En İyi:",
+      "tab-test": "Test Yap",
+      "tab-exercise": "Nefes Egzersizi",
+      "tab-info": "VO₂ Max Nedir?",
+      "medical-disclaimer": "<strong>⚠️ ÖNEMLİ UYARI:</strong> Bu uygulama tıbbi bir teşhis aracı değildir. Elde edilen veriler tahmini değerlerdir.",
+      "test-step-1": "Derin bir nefes alın ve daire büyüdüğünde nefesinizi tutun.",
+      "test-step-2": "<b>Başlat</b>'a basın ve nefesinizi tutmaya devam edin.",
+      "test-step-3": "Değerleri canlı takip edin. Durmak için <b>Durdur</b>'a basın.",
+      "unit-sec": "sn",
+      "btn-start-test": "Testi Başlat",
+      "btn-stop": "Durdur",
+      "live-analysis": "Anlık Analiz Verileri",
+      "label-lung-age": "Tahmini Akciğer Yaşı",
+      "label-vo2-max": "Tahmini VO₂ Max",
+      "status-waiting": "Bekleniyor",
+      "expert-advice-low": "<strong>Uzman Tavsiyesi:</strong> Nefes tutma süreniz düşüktür.",
+      "summary-data": "Özet Veriler",
+      "stat-total": "Toplam Test",
+      "stat-avg": "Ortalama Süre",
+      "stat-status": "Durum",
+      "badge-ready": "Hazır",
+      "badge-low": "Düşük",
+      "badge-good": "İyi",
+      "badge-perfect": "Mükemmel",
+      "ex-title": "Wim Hof Tekniği",
+      "ex-subtitle": "Akciğer kapasitesini geliştirin ve stresi yönetin",
+      "ex-start-instruction": "Başlamak için butona dokunun. 30 derin nefes alıp vereceğiz.",
+      "btn-start-ex": "Egzersizi Başlat",
+      "btn-reset": "Sıfırla",
+      "ex-phase-1": "Aşama 1: Hiperventilasyon",
+      "ex-phase-1-instr": "Tam derin nefes al, serbest bırak...",
+      "ex-phase-2": "Aşama 2: Nefesi Tut",
+      "ex-phase-2-instr": "Nefesini tamamen ver ve tutabildiğin kadar tut.",
+      "ex-phase-3": "Aşama 3: Toparlanma",
+      "ex-phase-3-instr": "Derin nefes al ve 15 saniye içerde tut.",
+      "ex-completed": "Tamamlandı!",
+      "ex-done-instr": "Egzersiz bitti. Harika iş çıkardınız.",
+      "info-title": "VO₂ Max Hakkında Bilmeniz Gerekenler",
+      "info-subtitle": "Sağlık ve performansın en önemli biyolojik göstergesi",
+      "info-q1": "VO₂ Max Neden Önemli?",
+      "info-p1": "VO₂ max, yalnızca bir 'spor performansı' göstergesi değil, aynı zamanda <strong>genel sağlık, metabolizma ve yaşlanma süreci</strong> hakkında önemli ipuçları verir. Düzenli ölçüm ve antrenmanla bu değeri yükseltmek mümkündür.",
+      "info-p2": "Vücudunuzun dakikada kilogram başına ne kadar oksijen kullanabildiğini gösteren bu değer, <strong>kardiyovasküler kondisyonunuzun en güvenilir göstergesi</strong> olarak kabul edilir.",
+      "info-table-title": "Yetişkinler İçin VO₂ Max Ortalama Değerleri (ml/kg/dk)",
+      "th-age": "Yaş Aralığı",
+      "th-male": "Erkek (Ortalama)",
+      "th-female": "Kadın (Ortalama)",
+      "th-eval": "Değerlendirme",
+      "td-eval-1": "Genç yetişkinlerde iyi kondisyon",
+      "td-eval-2": "Aktif bireyler için normal",
+      "td-eval-3": "Orta seviye, hareketsizlerde düşüş",
+      "td-eval-4": "Yaşlanma etkisi belirginleşir",
+      "td-eval-5": "Düzenli egzersizle korunabilir",
+      "info-effects-title": "VO₂ Max'in Sağlık Üzerindeki Etkileri",
+      "effect-card-1-t": "Kardiyovasküler Sağlık",
+      "effect-card-1-p": "Kalp ve dolaşım sistemi verimliliğinin göstergesi.",
+      "effect-card-2-t": "Metabolizma",
+      "effect-card-2-p": "Vücudun enerji üretim kapasitesini yansıtır.",
+      "effect-card-3-t": "Hastalık Direnci",
+      "effect-card-3-p": "Yüksek VO₂ birçok hastalığa karşı koruma sağlar.",
+      "effect-card-4-t": "Yaşlanma Süreci",
+      "effect-card-4-p": "Biyolojik yaş ve yaşlanma hızı hakkında bilgi verir.",
+      "footer-credit": "Aysun tarafından hazırlanmıştır.",
+      "age-unit": " Yaş"
+    },
+    en: {
+      "header-title": "Breath & Fitness Analysis",
+      "top-score-label": "Best:",
+      "tab-test": "Take Test",
+      "tab-exercise": "Breathing Exercise",
+      "tab-info": "What is VO₂ Max?",
+      "medical-disclaimer": "<strong>⚠️ IMPORTANT:</strong> This app is not a medical diagnostic tool. Data are estimates.",
+      "test-step-1": "Take a deep breath and hold it when the circle expands.",
+      "test-step-2": "Press <b>Start</b> and keep holding your breath.",
+      "test-step-3": "Track live values. Press <b>Stop</b> to finish.",
+      "unit-sec": "sec",
+      "btn-start-test": "Start Test",
+      "btn-stop": "Stop",
+      "live-analysis": "Live Analysis Data",
+      "label-lung-age": "Estimated Lung Age",
+      "label-vo2-max": "Estimated VO₂ Max",
+      "status-waiting": "Waiting",
+      "expert-advice-low": "<strong>Advice:</strong> Your hold time is low.",
+      "summary-data": "Summary Stats",
+      "stat-total": "Total Tests",
+      "stat-avg": "Average Time",
+      "stat-status": "Status",
+      "badge-ready": "Ready",
+      "badge-low": "Low",
+      "badge-good": "Good",
+      "badge-perfect": "Excellent",
+      "ex-title": "Wim Hof Method",
+      "ex-subtitle": "Improve lung capacity and manage stress",
+      "ex-start-instruction": "Tap to start. We will do 30 deep breaths.",
+      "btn-start-ex": "Start Exercise",
+      "btn-reset": "Reset",
+      "ex-phase-1": "Phase 1: Hyperventilation",
+      "ex-phase-1-instr": "Full inhale, let go...",
+      "ex-phase-2": "Phase 2: Breath Hold",
+      "ex-phase-2-instr": "Exhale fully and hold as long as you can.",
+      "ex-phase-3": "Phase 3: Recovery",
+      "ex-phase-3-instr": "Deep breath in and hold for 15 seconds.",
+      "ex-completed": "Completed!",
+      "ex-done-instr": "Exercise finished. Great job.",
+      "info-title": "What You Need to Know About VO₂ Max",
+      "info-subtitle": "The most important biological indicator of health and performance",
+      "info-q1": "Why is VO₂ Max Important?",
+      "info-p1": "VO₂ max is not just a 'sports performance' metric, it also provides clues about <strong>general health, metabolism, and the aging process</strong>. It's possible to increase this value with regular training.",
+      "info-p2": "Representing how much oxygen your body can use per minute per kilogram, it is considered the <strong>most reliable indicator of cardiovascular fitness</strong>.",
+      "info-table-title": "Average VO₂ Max Values for Adults (ml/kg/min)",
+      "th-age": "Age Range",
+      "th-male": "Male (Average)",
+      "th-female": "Female (Average)",
+      "th-eval": "Evaluation",
+      "td-eval-1": "Good fitness in young adults",
+      "td-eval-2": "Normal for active individuals",
+      "td-eval-3": "Moderate, decline in sedentary",
+      "td-eval-4": "Aging effects become clear",
+      "td-eval-5": "Maintainable with regular exercise",
+      "info-effects-title": "Health Effects of VO₂ Max",
+      "effect-card-1-t": "Cardiovascular Health",
+      "effect-card-1-p": "Indicator of heart and circulation efficiency.",
+      "effect-card-2-t": "Metabolism",
+      "effect-card-2-p": "Reflects body's energy production capacity.",
+      "effect-card-3-t": "Disease Resistance",
+      "effect-card-3-p": "High VO₂ protects against many diseases.",
+      "effect-card-4-t": "Aging Process",
+      "effect-card-4-p": "Information about biological age and pace.",
+      "footer-credit": "Prepared by Aysun.",
+      "age-unit": " Years"
+    },
+    es: {
+      "header-title": "Análisis Respiratorio",
+      "top-score-label": "Mejor:",
+      "tab-test": "Hacer Test",
+      "tab-exercise": "Ejercicio Respiratorio",
+      "tab-info": "¿Qué es VO₂ Max?",
+      "medical-disclaimer": "<strong>⚠️ AVISO:</strong> Esta aplicación no es una herramienta médica. Los datos son estimaciones.",
+      "test-step-1": "Inhale profundamente y mantenga cuando el círculo crezca.",
+      "test-step-2": "Presione <b>Inicio</b> y siga aguantando.",
+      "test-step-3": "Siga los valores en vivo. Presione <b>Parar</b>.",
+      "unit-sec": "seg",
+      "btn-start-test": "Iniciar Test",
+      "btn-stop": "Parar",
+      "live-analysis": "Análisis en Vivo",
+      "label-lung-age": "Edad Pulmonar Est.",
+      "label-vo2-max": "VO₂ Max Est.",
+      "status-waiting": "Esperando",
+      "expert-advice-low": "<strong>Consejo:</strong> Su tiempo es bajo.",
+      "summary-data": "Resumen",
+      "stat-total": "Tests Totales",
+      "stat-avg": "Promedio",
+      "stat-status": "Estado",
+      "badge-ready": "Listo",
+      "badge-low": "Bajo",
+      "badge-good": "Bueno",
+      "badge-perfect": "Excelente",
+      "ex-title": "Método Wim Hof",
+      "ex-subtitle": "Mejora tu capacidad pulmonar.",
+      "ex-start-instruction": "Toque para iniciar. Haremos 30 respiraciones.",
+      "btn-start-ex": "Iniciar Ejercicio",
+      "btn-reset": "Reiniciar",
+      "ex-phase-1": "Fase 1: Hiperventilación",
+      "ex-phase-1-instr": "Inhala profundo, suelta...",
+      "ex-phase-2": "Fase 2: Retención",
+      "ex-phase-2-instr": "Exhala y aguanta todo lo que puedas.",
+      "ex-phase-3": "Fase 3: Recuperación",
+      "ex-phase-3-instr": "Inhala y aguanta 15 segundos.",
+      "ex-completed": "¡Completado!",
+      "ex-done-instr": "Ejercicio terminado. Buen trabajo.",
+      "info-title": "Lo que debes saber sobre el VO₂ Max",
+      "info-subtitle": "El indicador biológico más importante de salud y rendimiento",
+      "info-q1": "¿Por qué es importante el VO₂ Max?",
+      "info-p1": "El VO₂ max no es solo una métrica de 'rendimiento deportivo', también proporciona pistas sobre la <strong>salud general, el metabolismo y el proceso de envejecimiento</strong>.",
+      "info-p2": "Representa cuánto oxígeno puede usar su cuerpo por minuto por kilogramo, se considera el <strong>indicador más confiable de la aptitud cardiovascular</strong>.",
+      "info-table-title": "Valores promedio de VO₂ Max para adultos (ml/kg/min)",
+      "th-age": "Rango de edad",
+      "th-male": "Hombre (Promedio)",
+      "th-female": "Mujer (Promedio)",
+      "th-eval": "Evaluación",
+      "td-eval-1": "Buena forma en adultos jóvenes",
+      "td-eval-2": "Normal para individuos activos",
+      "td-eval-3": "Moderado, descenso en sedentarios",
+      "td-eval-4": "Efectos del envejecimiento claros",
+      "td-eval-5": "Mantenible con ejercicio regular",
+      "info-effects-title": "Efectos del VO₂ Max en la salud",
+      "effect-card-1-t": "Salud Cardiovascular",
+      "effect-card-1-p": "Indicador de eficiencia del corazón.",
+      "effect-card-2-t": "Metabolismo",
+      "effect-card-2-p": "Refleja la capacidad energética.",
+      "effect-card-3-t": "Resistencia a enfermedades",
+      "effect-card-3-p": "El VO₂ alto protege contra enfermedades.",
+      "effect-card-4-t": "Proceso de envejecimiento",
+      "effect-card-4-p": "Información sobre edad biológica.",
+      "footer-credit": "Preparado por Aysun.",
+      "age-unit": " Años"
+    }
+  };
+
+  let currentLang = 'tr';
+
+  function updateLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[lang][key]) {
+        el.innerHTML = translations[lang][key];
+      }
+    });
+    if (AppState.chart) {
+      AppState.chart.data.datasets[0].label = translations[lang]["unit-sec"];
+      AppState.chart.update();
+    }
+    updateUIStats();
+  }
+
+  document.getElementById('langSelect').onchange = (e) => updateLanguage(e.target.value);
+
+  const AppState = {
+    results: JSON.parse(localStorage.getItem('lung_test_results') || '[]'),
+    chart: null,
+    testTimer: null,
+    exerciseTimer: null,
+    exerciseState: 'idle',
+    breathCount: 0
+  };
+
+  function switchTab(e, tabId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    e.currentTarget.classList.add('active');
+  }
+
+  const testUI = {
+    startBtn: document.getElementById("start"),
+    stopBtn: document.getElementById("stop"),
+    timeEl: document.getElementById("time"),
+    breathCircle: document.getElementById("breathCircle"),
+    resultCard: document.getElementById("resultCard"),
+    lungAgeEl: document.getElementById("lungAge"),
+    vo2MaxEl: document.getElementById("vo2Max"),
+    statusBadge: document.getElementById("statusBadge"),
+    totalTestsEl: document.getElementById("totalTests"),
+    avgScoreEl: document.getElementById("avgScore"),
+    topScoreMini: document.getElementById("topScoreMini"),
+    expertAdvice: document.getElementById("expertAdvice")
+  };
+
+  function initChart() {
+    const ctx = document.getElementById('chart').getContext('2d');
+    AppState.chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: AppState.results.map((_, i) => i + 1),
+        datasets: [{
+          label: translations[currentLang]["unit-sec"],
+          data: AppState.results,
+          borderColor: '#22b8cf',
+          backgroundColor: 'rgba(34, 184, 207, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { beginAtZero: true } }
+      }
+    });
+    updateUIStats();
+  }
+
+  function updateUIStats() {
+    const t = translations[currentLang];
+    if (AppState.results.length === 0) return;
+    
+    const max = Math.max(...AppState.results);
+    const avg = AppState.results.reduce((a, b) => a + b, 0) / AppState.results.length;
+
+    testUI.topScoreMini.textContent = max + " " + t["unit-sec"];
+    testUI.totalTestsEl.textContent = AppState.results.length;
+    testUI.avgScoreEl.textContent = Math.round(avg) + " " + t["unit-sec"];
+    
+    const last = AppState.results[AppState.results.length - 1];
+    let key = "badge-low";
+    if (last > 50) key = "badge-perfect";
+    else if (last > 30) key = "badge-good";
+    testUI.statusBadge.textContent = t[key];
+  }
+
+  testUI.startBtn.onclick = () => {
+    let sec = 0;
+    testUI.startBtn.disabled = true;
+    testUI.stopBtn.disabled = false;
+    testUI.resultCard.style.opacity = "1";
+    testUI.breathCircle.classList.remove("breathing");
+    testUI.breathCircle.style.transform = "scale(1.5)";
+
+    AppState.testTimer = setInterval(() => {
+      sec++;
+      testUI.timeEl.textContent = sec;
+      let age = Math.max(18, 25 + (45 - sec) * 1.2);
+      testUI.lungAgeEl.textContent = Math.round(age) + translations[currentLang]["age-unit"];
+      testUI.vo2MaxEl.textContent = (sec * 0.35 + 22).toFixed(1);
+    }, 1000);
+
+    testUI.stopBtn.onclick = () => {
+      clearInterval(AppState.testTimer);
+      testUI.startBtn.disabled = false;
+      testUI.stopBtn.disabled = true;
+      testUI.breathCircle.style.transform = "scale(1)";
+      setTimeout(() => testUI.breathCircle.classList.add("breathing"), 500);
+      AppState.results.push(sec);
+      localStorage.setItem('lung_test_results', JSON.stringify(AppState.results));
+      AppState.chart.data.labels.push(AppState.results.length);
+      AppState.chart.data.datasets[0].data.push(sec);
+      AppState.chart.update();
+      updateUIStats();
+      testUI.expertAdvice.style.display = sec < 15 ? "block" : "none";
+    };
+  };
+
+  const exUI = {
+    startBtn: document.getElementById("exStart"),
+    resetBtn: document.getElementById("exReset"),
+    circle: document.getElementById("exCircle"),
+    status: document.getElementById("exStatus"),
+    instruction: document.getElementById("exInstruction"),
+    counter: document.getElementById("exCounter"),
+    timeDisplay: document.getElementById("exTime"),
+    timerContainer: document.getElementById("exTimerDisplay")
+  };
+
+  function runBreathing() {
+    const t = translations[currentLang];
+    AppState.exerciseState = "breathing";
+    exUI.status.textContent = t["ex-phase-1"];
+    exUI.instruction.textContent = t["ex-phase-1-instr"];
+    const loop = setInterval(() => {
+      if (AppState.exerciseState !== "breathing") { clearInterval(loop); return; }
+      AppState.breathCount++;
+      exUI.counter.textContent = AppState.breathCount + " / 30";
+      exUI.circle.style.transform = "scale(1.8)";
+      setTimeout(() => { if(AppState.exerciseState === "breathing") exUI.circle.style.transform = "scale(1)"; }, 1500);
+      if (AppState.breathCount >= 30) { clearInterval(loop); startHold(); }
+    }, 3000);
+  }
+
+  function startHold() {
+    const t = translations[currentLang];
+    AppState.exerciseState = "holding";
+    exUI.status.textContent = t["ex-phase-2"];
+    exUI.instruction.textContent = t["ex-phase-2-instr"];
+    exUI.counter.style.display = "none";
+    exUI.timerContainer.style.display = "block";
+    exUI.startBtn.textContent = t["tab-exercise"];
+    let sec = 0;
+    AppState.exerciseTimer = setInterval(() => { sec++; exUI.timeDisplay.textContent = sec; }, 1000);
+  }
+
+  exUI.startBtn.onclick = () => {
+    if (AppState.exerciseState === "idle") runBreathing();
+    else if (AppState.exerciseState === "holding") {
+      clearInterval(AppState.exerciseTimer);
+      AppState.exerciseState = "recovery";
+      exUI.status.textContent = translations[currentLang]["ex-phase-3"];
+      exUI.circle.style.transform = "scale(1.8)";
+      let count = 15;
+      AppState.exerciseTimer = setInterval(() => {
+        count--; exUI.timeDisplay.textContent = count;
+        if (count <= 0) {
+          clearInterval(AppState.exerciseTimer);
+          exUI.status.textContent = translations[currentLang]["ex-completed"];
+          exUI.circle.style.transform = "scale(1)";
+          AppState.exerciseState = "idle";
+        }
+      }, 1000);
+    }
+  };
+
+  window.onload = initChart;
+</script>
+</body>
+</html>
